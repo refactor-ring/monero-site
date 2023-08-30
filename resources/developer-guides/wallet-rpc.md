@@ -142,14 +142,14 @@ Alias: *None*.
 
 Inputs:
 
-* *address* - string; (Optional; Default: "") The URL of the daemon to connect to.
-* *trusted* - boolean; (Optional; Default: false) If false, some RPC wallet methods will be disabled.
-* *ssl_support* - string; (Optional; Default: autodetect; Accepts: disabled, enabled, autodetect) Specifies whether the Daemon uses SSL encryption.
+* *address* - string; (Optional, Defaults to "") The URL of the daemon to connect to.
+* *trusted* - boolean; (Optional, Defaults to false) If false, some RPC wallet methods will be disabled.
+* *ssl_support* - string; (Optional, Defaults to autodetect; Accepts: disabled, enabled, autodetect) Specifies whether the Daemon uses SSL encryption.
 * *ssl_private_key_path* - string; (Optional) The file path location of the SSL key.
 * *ssl_certificate_path* - string; (Optional) The file path location of the SSL certificate.
 * *ssl_ca_file* - string; (Optional) The file path location of the certificate authority file.
 * *ssl_allowed_fingerprints* - array of string; (Optional) The SHA1 fingerprints accepted by the SSL certificate.
-* *ssl_allow_any_cert* - boolean; (Optional; Default: false) If false, the certificate must be signed by a trusted certificate authority.
+* *ssl_allow_any_cert* - boolean; (Optional, Defaults to false) If false, the certificate must be signed by a trusted certificate authority.
 * *username* - string; (Optional) 
 * *password* - string; (Optional)
 
@@ -192,7 +192,7 @@ Outputs:
 * *blocks_to_unlock* - unsigned int; Number of blocks before balance is safe to spend.
 * *per_subaddress* - array of subaddress information; Balance information for each subaddress in an account.
   * *account_index* - unsigned int;
-  * *address_index* - unsigned int; Index of the subaddress in the account.
+  * *address_index* - unsigned int; Index of the subaddress under the account.
   * *address* - string; Address at this index. Base58 representation of the public keys.
   * *balance* - unsigned int; Balance for the subaddress (locked or unlocked).
   * *unlocked_balance* - unsigned int; Unlocked balance for the subaddress.
@@ -254,11 +254,11 @@ Inputs:
 Outputs:
 
 * *address* - string; The 95-character hex address string of the monero-wallet-rpc in session.
-* *addresses* array of addresses informations
-  * *address* string; The 95-character hex (sub)address string.
-  * *label* string; Label of the (sub)address
-  * *address_index* unsigned int; index of the subaddress
-  * *used* boolean; states if the (sub)address has already received funds
+* *addresses* - array of addresses informations
+  * *address* - string; The 95-character hex (sub)address string.
+  * *label* - string; Label of the (sub)address
+  * *address_index* - unsigned int; index of the subaddress
+  * *used* - boolean; states if the (sub)address has already received funds
 
 Example:
 
@@ -303,9 +303,9 @@ Inputs:
 
 Outputs:
 
-* *index* - subaddress informations
-  * *major* unsigned int; Account index.
-  * *minor* unsigned int; Address index.
+* *index* - SubAddressIndex; JSON object containing the major & minor subaddress index:
+  * *major* - unsigned int; Account index.
+  * *minor* - unsigned int; Address index.
 
 Example:
 
@@ -369,9 +369,9 @@ Alias: *None*.
 
 Inputs:
 
-* *index* - subaddress index; JSON Object containing the major & minor address index:
+* *index* - SubAddressIndex; JSON Object containing the major & minor address index:
   * *major* - unsigned int; Account index for the subaddress.
-  * *minor* - unsigned int; Index of the subaddress in the account.
+  * *minor* - unsigned int; Index of the subaddress under the account.
 * *label* - string; Label for the address.
 
 Outputs: *None*.
@@ -389,15 +389,15 @@ $ curl http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"l
 ```
 
 
-### validate_address
+### **validate_address**
 
 Analyzes a string to determine whether it is a valid monero wallet address and returns the result and the address specifications.
 
 Inputs:
 
 * *address* - string; The address to validate.
-* *any_net_type* - boolean (Optional); If true, consider addresses belonging to any of the three Monero networks (mainnet, stagenet, and testnet) valid. Otherwise, only consider an address valid if it belongs to the network on which the rpc-wallet's current daemon is running (Defaults to false).
-* *allow_openalias* - boolean (Optional); If true, consider [OpenAlias-formatted addresses]({{ site.baseurl }}/resources/moneropedia/openalias.html) valid (Defaults to false).
+* *any_net_type* - boolean; (Optional); If true, consider addresses belonging to any of the three Monero networks (mainnet, stagenet, and testnet) valid. Otherwise, only consider an address valid if it belongs to the network on which the rpc-wallet's current daemon is running (Defaults to false).
+* *allow_openalias* - boolean; (Optional); If true, consider [OpenAlias-formatted addresses]({{ site.baseurl }}/resources/moneropedia/openalias.html) valid (Defaults to false).
 
 Outputs:
 * *valid* - boolean; True if the input address is a valid Monero address.
@@ -528,11 +528,6 @@ $ curl http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"l
   "id": "0",
   "jsonrpc": "2.0",
   "result": {
-    "account_tags": [{
-      "accounts": [0,1],
-      "label": "",
-      "tag": "myTag"
-    }]
   }
 }
 ```
@@ -682,15 +677,15 @@ Alias: *None*.
 
 Inputs:
 
-* *destinations* - array of destinations to receive XMR:
+* *destinations* - array of Destination; List of destinations to receive XMR:
   * *amount* - unsigned int; Amount to send to each destination, in @atomic-units.
   * *address* - string; Destination public address.
 * *account_index* - unsigned int; (Optional) Transfer from this account index. (Defaults to 0)
 * *subaddr_indices* - array of unsigned int; (Optional) Transfer from this set of subaddresses. (Defaults to empty - all indices)
-* *priority* - unsigned int; Set a priority for the transaction. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.
-* *mixin* - unsigned int; Number of outputs from the blockchain to mix with (0 means no mixing).
-* *ring_size* - unsigned int; Number of outputs to mix in the transaction (this output + N decoys from the blockchain). (Unless dealing with pre rct outputs, this field is ignored on mainnet).
-* *unlock_time* - unsigned int; Number of blocks before the monero can be spent (0 to not add a lock).
+* *priority* - unsigned int; (Optional) Set a priority for the transaction. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.
+* *mixin* - unsigned int; (Optional) Number of outputs from the blockchain to mix with (0 means no mixing).
+* *ring_size* - unsigned int; (Optional) Number of outputs to mix in the transaction (this output + N decoys from the blockchain). (Unless dealing with pre rct outputs, this field is ignored on mainnet).
+* *unlock_time* - unsigned int; (Optional) Number of blocks before the monero can be spent (0 to not add a lock).
 * *get_tx_key* - boolean; (Optional) Return the transaction key after sending.
 * *do_not_relay* - boolean; (Optional) If true, the newly created transaction will not be relayed to the monero network. (Defaults to false)
 * *get_tx_hex* - boolean; Return the transaction as hex string after sending (Defaults to false)
@@ -699,14 +694,14 @@ Inputs:
 
 Outputs:
 
-* *amount* - Amount transferred for the transaction.
-* *fee* - Integer value of the fee charged for the txn.
-* *multisig_txset* - Set of multisig transactions in the process of being signed (empty for non-multisig).
-* *tx_blob* - Raw transaction represented as hex string, if get_tx_hex is true.
-* *tx_hash* - String for the publically searchable transaction hash.
-* *tx_key* - String for the transaction key if get_tx_key is true, otherwise, blank string.
-* *tx_metadata* - Set of transaction metadata needed to relay this transfer later, if get_tx_metadata is true.
-* *unsigned_txset* - String. Set of unsigned tx for cold-signing purposes.
+* *amount* - int; Amount transferred for the transaction.
+* *fee* - int; Integer value of the fee charged for the txn.
+* *multisig_txset* - string; Set of multisig transactions in the process of being signed (empty for non-multisig).
+* *tx_blob* - string; Raw transaction represented as hex string, if get_tx_hex is true.
+* *tx_hash* - string; String for the publically searchable transaction hash.
+* *tx_key* - string; String for the transaction key if get_tx_key is true, otherwise, blank string.
+* *tx_metadata* - string; Set of transaction metadata needed to relay this transfer later, if get_tx_metadata is true.
+* *unsigned_txset* - String; Set of unsigned tx for cold-signing purposes.
 
 Example:
 
@@ -742,27 +737,27 @@ Inputs:
   * *address* - string; Destination public address.
 * *account_index* - unsigned int; (Optional) Transfer from this account index. (Defaults to 0)
 * *subaddr_indices* - array of unsigned int; (Optional) Transfer from this set of subaddresses. (Defaults to empty - all indices)
-* *ring_size* - unsigned int; Sets ringsize to n (mixin + 1). (Unless dealing with pre rct outputs, this field is ignored on mainnet).
-* *unlock_time* - unsigned int; Number of blocks before the monero can be spent (0 to not add a lock).
+* *ring_size* - unsigned int; (Optional) Sets ringsize to n (mixin + 1). (Unless dealing with pre rct outputs, this field is ignored on mainnet).
+* *unlock_time* - unsigned int; (Optional) Number of blocks before the monero can be spent (0 to not add a lock).
 * *payment_id* - string; (Optional, defaults to a random ID) 16 characters hex encoded.
 * *get_tx_keys* - boolean; (Optional) Return the transaction keys after sending.
-* *priority* - unsigned int; Set a priority for the transactions. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.
+* *priority* - unsigned int; (Optional) Set a priority for the transactions. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.
 * *do_not_relay* - boolean; (Optional) If true, the newly created transaction will not be relayed to the monero network. (Defaults to false)
-* *get_tx_hex* - boolean; Return the transactions as hex string after sending
-* *get_tx_metadata* - boolean; Return list of transaction metadata needed to relay the transfer later.
+* *get_tx_hex* - boolean; (Optional) Return the transactions as hex string after sending
+* *get_tx_metadata* - boolean; (Optional) Return list of transaction metadata needed to relay the transfer later.
 
 Outputs:
 
-* *tx_hash_list* - array of: string. The tx hashes of every transaction.
-* *tx_key_list* - array of: string. The transaction keys for every transaction.
-* *amount_list* - array of: integer. The amount transferred for every transaction.
-* *fee_list* - array of: integer. The amount of fees paid for every transaction.
-* *weight_list* - array of: integer. Metric used to calculate transaction fee.
-* *tx_blob_list* - array of: string. The tx as hex string for every transaction.
-* *tx_metadata_list* - array of: string. List of transaction metadata needed to relay the transactions later.
+* *tx_hash_list* - array of string. The tx hashes of every transaction.
+* *tx_key_list* - array of string. The transaction keys for every transaction.
+* *amount_list* - array of integer. The amount transferred for every transaction.
+* *fee_list* - array of integer. The amount of fees paid for every transaction.
+* *weight_list* - array of integer. Metric used to calculate transaction fee.
+* *tx_blob_list* - array of string. The tx as hex string for every transaction.
+* *tx_metadata_list* - array of string. List of transaction metadata needed to relay the transactions later.
 * *multisig_txset* - string. The set of signing keys used in a multisig transaction (empty for non-multisig).
 * *unsigned_txset* - string. Set of unsigned tx for cold-signing purposes.
-* *spent_key_images_list* - array of: string. Key images of spent outputs.
+* *spent_key_images_list* - array of string. Key images of spent outputs.
   * *key_images* - array of string;
 
 Example:
@@ -779,10 +774,10 @@ $ curl http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"t
     "multisig_txset": "",
     "tx_hash_list": ["4adcdc1af3f665770cdf8fb7a380887cd07ac53c2b771bd18df5ca375d5e7540"],
     "tx_key_list": ["5b455c0f97168be652a2c03c5c68a064bb84cdae4ddef01b5c48d73a0bbb27075fb714f2ca19ea6c8ff592417e606addea6deb1d6530e2969f75681ffcbfc4075677b94a8c9197963ae38fa6f543ee68f0a4c4bbda4c453f39538f00b28e980ea08509730b51c004960101ba2f3adbc34cbbdff0d5af9dba061b523090debd06"],
-    "unsigned_txset": ""
+    "unsigned_txset": "",
     "spent_key_images_list": [{
       "key_images": ["cea4f54494d4cc28c006af7551b57a49eb6e8aac966ffa7b169f32298213c6ca"]
-    }],
+    }]
   }
 }
 ```
@@ -803,10 +798,11 @@ Inputs:
 Outputs:
 
 * *signed_txset* - string. Set of signed tx to be used for submitting transfer.
-* *tx_hash_list* - array of: string. The tx hashes of every transaction.
-* *tx_raw_list* - array of: string. The tx raw data of every transaction.
-* *tx_key_list* - array of: string.
+* *tx_hash_list* - array of string. The tx hashes of every transaction.
+* *tx_raw_list* - array of string. The tx raw data of every transaction.
+* *tx_key_list* - array of string.
 
+Example:
 In the example below, we first generate an unsigned_txset on a read only wallet before signing it:
 
 Generate unsigned_txset using the above "transfer" method on read-only wallet:
@@ -854,8 +850,9 @@ Inputs:
 
 Outputs:
 
-* *tx_hash_list* - array of: string. The tx hashes of every transaction.
+* *tx_hash_list* - array of string. The tx hashes of every transaction.
 
+Example:
 In the example below, we submit the transfer using the signed_txset generated above:
 ```
 curl http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"submit_transfer","params":{"tx_data_hex":...long_hex..."}}' -H 'Content-Type: application/json'
@@ -883,16 +880,16 @@ Inputs:
 
 Outputs:
 
-* *tx_hash_list* - array of: string. The tx hashes of every transaction.
-* *tx_key_list* - array of: string. The transaction keys for every transaction.
-* *amount_list* - array of: integer. The amount transferred for every transaction.
-* *fee_list* - array of: integer. The amount of fees paid for every transaction.
-* *weight_list* - array of: integer. Metric used to calculate transaction fee.
-* *tx_blob_list* - array of: string. The tx as hex string for every transaction.
-* *tx_metadata_list* - array of: string. List of transaction metadata needed to relay the transactions later.
+* *tx_hash_list* - array of string. The tx hashes of every transaction.
+* *tx_key_list* - array of string. The transaction keys for every transaction.
+* *amount_list* - array of integer. The amount transferred for every transaction.
+* *fee_list* - array of integer. The amount of fees paid for every transaction.
+* *weight_list* - array of integer. Metric used to calculate transaction fee.
+* *tx_blob_list* - array of string. The tx as hex string for every transaction.
+* *tx_metadata_list* - array of string. List of transaction metadata needed to relay the transactions later.
 * *multisig_txset* - string. The set of signing keys used in a multisig transaction (empty for non-multisig).
 * *unsigned_txset* - string. Set of unsigned tx for cold-signing purposes.
-* *spent_key_images_list* - array of: string. Key images of spent outputs.
+* *spent_key_images_list* - array of string. Key images of spent outputs.
   * *key_images* - array of string;
 
 Example (In this example, `sweep_dust` returns nothing because there are no funds to sweep):
@@ -920,7 +917,7 @@ Alias: *None*.
 Inputs:
 
 * *address* - string; Destination public address.
-* *account_index* - unsigned int; Sweep transactions from this account.
+* *account_index* - unsigned int; (Optional) Sweep transactions from this account.
 * *subaddr_indices* - array of unsigned int; (Optional) Sweep from this set of subaddresses in the account.
 * *subaddr_indices_all* - boolean; (Optional) use outputs in all subaddresses within an account (Defaults to false).
 * *priority* - unsigned int; (Optional) Priority for sending the sweep transfer, partially determines fee.
@@ -936,16 +933,16 @@ Inputs:
 
 Outputs:
 
-* *tx_hash_list* - array of: string. The tx hashes of every transaction.
-* *tx_key_list* - array of: string. The transaction keys for every transaction.
-* *amount_list* - array of: integer. The amount transferred for every transaction.
-* *fee_list* - array of: integer. The amount of fees paid for every transaction.
-* *weight_list* - array of: integer. Metric used for adjusting fee.
-* *tx_blob_list* - array of: string. The tx as hex string for every transaction.
-* *tx_metadata_list* - array of: string. List of transaction metadata needed to relay the transactions later.
+* *tx_hash_list* - array of string. The tx hashes of every transaction.
+* *tx_key_list* - array of string. The transaction keys for every transaction.
+* *amount_list* - array of integer. The amount transferred for every transaction.
+* *fee_list* - array of integer. The amount of fees paid for every transaction.
+* *weight_list* - array of integer. Metric used for adjusting fee.
+* *tx_blob_list* - array of string. The tx as hex string for every transaction.
+* *tx_metadata_list* - array of string. List of transaction metadata needed to relay the transactions later.
 * *multisig_txset* - string. The set of signing keys used in a multisig transaction (empty for non-multisig).
 * *unsigned_txset* - string. Set of unsigned tx for cold-signing purposes.
-* *spent_key_images_list* - array of: string. Key images of spent outputs.
+* *spent_key_images_list* - array of string. Key images of spent outputs.
   * *key_images* - array of string;
 
 Example:
@@ -996,16 +993,16 @@ Inputs:
 
 Outputs:
 
-* *tx_hasht* - array of: string. The tx hashes of every transaction.
-* *tx_key* - array of: string. The transaction keys for every transaction.
-* *amount* - array of: integer. The amount transferred for every transaction.
-* *fee* - array of: integer. The amount of fees paid for every transaction.
+* *tx_hasht* - array of string. The tx hashes of every transaction.
+* *tx_key* - array of string. The transaction keys for every transaction.
+* *amount* - array of integer. The amount transferred for every transaction.
+* *fee* - array of integer. The amount of fees paid for every transaction.
 * *weight* - unsigned int; Metric used to calculate transaction fee.
-* *tx_blob* - array of: string. The tx as hex string for every transaction.
+* *tx_blob* - array of string. The tx as hex string for every transaction.
 * *tx_metadata* - string. Transaction metadata needed to relay the transactions later.
 * *multisig_txset* - string. The set of signing keys used in a multisig transaction (empty for non-multisig).
 * *unsigned_txset* - string. Set of unsigned tx for cold-signing purposes.
-* *spent_key_images* - array of: string. Key images of spent outputs.
+* *spent_key_images* - array of string. Key images of spent outputs.
 
 Example:
 
@@ -1097,16 +1094,16 @@ Inputs:
 
 Outputs:
 
-* *payments* - list of:
+* *payments* - array of payment; list of:
   * *payment_id* - string; Payment ID matching the input parameter.
   * *tx_hash* - string; Transaction hash used as the transaction ID.
   * *amount* - unsigned int; Amount for this payment.
   * *block_height* - unsigned int; Height of the block that first confirmed this payment.
   * *unlock_time* - unsigned int; Time (in block height) until this payment is safe to spend.
   * *locked* - boolean; Is the output spendable.
-  * *subaddr_index* - subaddress index:
+  * *subaddr_index* - SubAddressIndex; JSON object containing the major & minor subaddress index:
     * *major* - unsigned int; Account index for the subaddress.
-    * *minor* - unsigned int; Index of the subaddress in the account.
+    * *minor* - unsigned int; Index of the subaddress under the account.
   * *address* - string; Address receiving the payment; Base58 representation of the public keys.
 
 Example:
@@ -1145,20 +1142,20 @@ Alias: *None*.
 
 Inputs:
 
-* *payment_ids* - array of: string; Payment IDs used to find the payments (16 characters hex).
+* *payment_ids* - array of string; Payment IDs used to find the payments (16 characters hex).
 * *min_block_height* - unsigned int; The block height at which to start looking for payments.
 
 Outputs:
 
-* *payments* - list of:
+* *payments* - array of payments:
   * *payment_id* - string; Payment ID matching one of the input IDs.
   * *tx_hash* - string; Transaction hash used as the transaction ID.
   * *amount* - unsigned int; Amount for this payment.
   * *block_height* - unsigned int; Height of the block that first confirmed this payment.
   * *unlock_time* - unsigned int; Time (in block height) until this payment is safe to spend.
-  * *subaddr_index* - subaddress index:
+  * *subaddr_index* - SubAddressIndex; JSON object containing the major & minor subaddress index:
     * *major* - unsigned int; Account index for the subaddress.
-    * *minor* - unsigned int; Index of the subaddress in the account.
+    * *minor* - unsigned int; Index of the subaddress under the account.
   * *address* - string; Address receiving the payment; Base58 representation of the public keys.
 
 Example:
@@ -1198,12 +1195,12 @@ Inputs:
 
 Outputs:
 
-* *transfers* - list of:
+* *transfers* - array of Transfer; List of transfers:
   * *amount* - unsigned int; Amount of this transfer.
   * *global_index* - unsigned int; Mostly internal use, can be ignored by most users.
   * *key_image* - string; Key image for the incoming transfer's unspent output.
   * *spent* - boolean; Indicates if this transfer has been spent.
-  * *subaddr_index* - JSON object containing the major & minor subaddress index:
+  * *subaddr_index* - SubAddressIndex; JSON object containing the major & minor subaddress index:
     * *major* - unsigned int; Account index for the subaddress.
     * *minor* - unsigned int; Index of the subaddress under the account.
   * *tx_hash* - string; Several incoming transfers may share the same hash if they were in the same transaction.
@@ -1689,6 +1686,7 @@ Outputs:
 * *in_pool* - boolean; States if the transaction is still in pool or has been added to a block.
 * *received* - unsigned int; Amount of the transaction.
 
+Example:
 In the example below, the transaction has been proven:
 
 ```
@@ -1767,6 +1765,7 @@ Outputs:
 
 * *good* - boolean; States if the inputs proves the spend.
 
+Example:
 In the example below, the spend has been proven:
 
 ```
@@ -1843,6 +1842,7 @@ Outputs:
 * *spent* - unsigned int; Amount (in @atomic-units) of the total that has been spent.
 * *total* - unsigned int; Total amount (in @atomic-units) of the reserve that was proven.
 
+Example:
 In the example below, the reserve has been proven:
 
 ```
@@ -1911,7 +1911,7 @@ Inputs:
 
 Outputs:
 
-* *in* array of transfers:
+* *in* - array of Transfer; List of transfer objects:
   * *address* - string; Public address of the transfer.
   * *amount* - unsigned int; Amount transferred.
   * *amounts* - array of unsigned int; If multiple amounts where recived they are individually listed.
@@ -1920,14 +1920,14 @@ Outputs:
   * *fee* - unsigned int; Transaction fee for this transfer.
   * *height* - unsigned int; Height of the first block that confirmed this transfer (0 if not mined yet).
   * *note* - string; Note about this transfer.
-  * *destinations* - array;
-    *amount* - unsigned int;
-    *address* - string;
+  * *destinations*  - array of JSON objects containing transfer destinations: (only for outgoing transactions):
+    * *address* - string; The public address of the recipient.
+    * *amount* - unsigned int; Amount to send to each destination, in @atomic-units.
   * *payment_id* - string; Payment ID for this transfer.
-  * *subaddr_index* - JSON object containing the major & minor subaddress index:
+  * *subaddr_index* - SubAddressIndex; JSON object containing the major & minor subaddress index:
     * *major* - unsigned int; Account index for the subaddress.
     * *minor* - unsigned int; Index of the subaddress under the account.
-  * *subaddr_indices* - array; list of indices if multiple where requested.
+  * *subaddr_indices* - array of SubAddressIndex; list of indices if multiple where requested.
     * *major* - unsigned int; Account index for the subaddress.
     * *minor* - unsigned int; Index of the subaddress under the account.
   * *suggested_confirmations_threshold* - unsigned int; Number of confirmations needed for the amount received to be lower than the accumulated block reward (or close to that).
@@ -1936,10 +1936,10 @@ Outputs:
   * *type* - string; Transfer type: "in"
   * *unlock_time* - unsigned int; Number of blocks until transfer is safely spendable.
   * *locked* - boolean; Is the output spendable.
-* *out* array of transfers (see above).
-* *pending* array of transfers (see above).
-* *failed* array of transfers (see above).
-* *pool* array of transfers (see above).
+* *out* - array of Transfer objects; (see above).
+* *pending* - array of Transfer objects; (see above).
+* *failed* - array of Transfer objects; (see above).
+* *pool* - array of Transfer objects; (see above).
 
 
 Example:
@@ -1994,21 +1994,21 @@ Inputs:
 
 Outputs:
 
-* *transfer* - JSON object containing payment information:
+* *transfer* - Transfer; JSON object containing payment information:
   * *address* - string; Address that transferred the funds. Base58 representation of the public keys.
   * *amount* - unsigned int; Amount of this transfer.
-  * *amounts* - list; Individual amounts if multiple where received.
+  * *amounts* - array of unsigned int; Individual amounts if multiple where received.
   * *confirmations* - unsigned int; Number of block mined since the block containing this transaction (or block height at which the transaction should be added to a block if not yet confirmed).
   * *destinations* - array of JSON objects containing transfer destinations: (only for outgoing transactions)
-    * *amount* - unsigned int; Amount transferred to this destination.
-    * *address* - string; Address for this destination. Base58 representation of the public keys.
+    * *address* - string; The public address of the recipient.
+    * *amount* - unsigned int; Amount to send to each destination, in @atomic-units.
   * *double_spend_seen* - boolean; True if the key image(s) for the transfer have been seen before.
   * *fee* - unsigned int; Transaction fee for this transfer.
   * *height* - unsigned int; Height of the first block that confirmed this transfer.
   * *locked* - boolean;
   * *note* - string; Note about this transfer.
   * *payment_id* - string; Payment ID for this transfer.
-  * *subaddr_index* - JSON object containing the major & minor subaddress index:
+  * *subaddr_index* - SubAddressIndex; JSON object containing the major & minor subaddress index:
     * *major* - unsigned int; Account index for the subaddress.
     * *minor* - unsigned int; Index of the subaddress under the account.
   * *suggested_confirmations_threshold* - unsigned int; Number of confirmations needed for the amount received to be lower than the accumulated block reward (or close to that).
@@ -2016,8 +2016,9 @@ Outputs:
   * *txid* - string; Transaction ID of this transfer (same as input TXID).
   * *type* - string; Type of transfer, one of the following: "in", "out", "pending", "failed", "pool"
   * *unlock_time* - unsigned int; Number of blocks until transfer is safely spendable.
-* *transfers* - list; If the list length is > 1 then multiple outputs where received in this transaction, each of which has its own `transfer` JSON object.
+* *transfers* - array of transfer; If the array length is > 1 then multiple outputs where received in this transaction, each of which has its own `transfer` JSON object.
 
+Example:
 In the example below, a single output was received at 1 address (note how it is duplicated in `transfers`:
 
 ```
@@ -2189,9 +2190,9 @@ Outputs:
 * *desc* - The description of the transfer as a list of:
   * *amount_in* - unsigned int (64 bit); The sum of the inputs spent by the transaction in @atomic-units.
   * *amount_out* - unsigned int (64 bit); The sum of the outputs created by the transaction in @atomic-units.
-  * *recipients* - list of:
+  * *recipients* - array of Destination; list of recipients:
     * *address* - string; The public address of the recipient. 
-    * *amount* - unsigned int; The amount sent to the recipient in @atomic-units.
+    * *amount* - unsigned int; Amount to send to each destination, in @atomic-units.
   * *change_address* - string; The address of the change recipient.
   * *change_amount* - unsigned int; The amount sent to the change address in @atomic-units.
   * *fee* - unsigned int; The fee charged for the transaction in @atomic-units.
@@ -2215,7 +2216,7 @@ $ curl http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"d
       "change_address": "5BqWeZrK944YesCy5VdmBneWeaSZutEijFVAKjpVHeVd4unsCSM55CjgViQsK9WFNHK1eZgcCuZ3fRqYpzKDokqSUmQfJzvswQs13AAidJ",
       "change_amount": 4976287087263,
       "dummy_outputs": 0,
-      "extra": 01b998f16459bcbac9c92074d3128d10724f10b74f5a7b1ec8e5a1e7f1150544020209010000000000000000",
+      "extra": "01b998f16459bcbac9c92074d3128d10724f10b74f5a7b1ec8e5a1e7f1150544020209010000000000000000",
       "fee": 33686583468, 
       "payment_id": "0000000000000000",
       "recipients": [{
@@ -2224,7 +2225,7 @@ $ curl http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"d
       }],       
       "ring_size": 11,
       "unlock_time": 0
-    ]}
+    }]
   }
 }
 ```
@@ -2296,7 +2297,7 @@ Alias: *None*.
 
 Inputs:
 
-* *all* - boolean (optional); If true, export all outputs. Otherwise, export outputs since the last export. (default = false)
+* *all* - boolean; (optional) If true, export all outputs. Otherwise, export outputs since the last export. (Defaults to false)
 
 Outputs:
 
@@ -2352,12 +2353,12 @@ Alias: *None*.
 
 Inputs:
 
-* *all* - boolean (optional); If true, export all key images. Otherwise, export key images since the last export. (default = false)
+* *all* - boolean; (optional) If true, export all key images. Otherwise, export key images since the last export. (Defaults to false)
 
 Outputs:
 
-* *offset* - unsigned int
-* *signed_key_images* - array of signed key images:
+* *offset* - unsigned int;
+* *signed_key_images* - Array of KeyImage; List of signed key images:
   * *key_image* - string;
   * *signature* - string;
 
@@ -2375,7 +2376,7 @@ $ curl http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"e
     },{
       "key_image": "65158a8ee5a3b32009b85a307d85b375175870e560e08de313531c7dbbe6fc19",
       "signature": "c96e40d09dfc45cfc5ed0b76bfd7ca793469588bb0cf2b4d7b45ef23d40fd4036057b397828062e31700dc0c2da364f50cd142295a8405b9fe97418b4b745d0c"
-    },...]
+    }]
   }
 }
 ```
@@ -2389,8 +2390,8 @@ Alias: *None*.
 
 Inputs:
 
-* *offset* - unsigned int (optional)
-* *signed_key_images* - array of signed key images:
+* *offset* - unsigned int; (optional)
+* *signed_key_images* - Array of KeyImage; List of signed key images:
   * *key_image* - string;
   * *signature* - string;
 
@@ -2460,7 +2461,7 @@ Inputs:
 
 Outputs:
 
-* *uri* - JSON object containing payment information:
+* *uri* - PaymentUri; JSON object containing payment information:
   * *address* - string; Wallet address
   * *amount* - unsigned int; Integer amount to receive, in **@atomic-units** (0 if not provided)
   * *payment_id* - string; (Optional, defaults to a random ID) 16 characters hex encoded.
@@ -2499,7 +2500,7 @@ Inputs:
 
 Outputs:
 
-* *entries* - array of entries:
+* *entries* - array of entries; List of address book entries:
   * *address* - string; Public address of the entry
   * *description* - string; Description of this address entry
   * *index* - unsigned int;
@@ -2539,7 +2540,7 @@ Inputs:
 
 * *address* - string;
 * *payment_id* - string; (Optional, defaults to a random ID) 16 characters hex encoded.
-* *description* - (optional) string, defaults to "";
+* *description* - string; (Optional) defaults to "";
 
 Outputs:
 
@@ -2567,7 +2568,7 @@ Alias: *None*
 
 Inputs:
 
-* *index* - unsigned_int; Index of the address book entry to edit.
+* *index* - unsigned int; Index of the address book entry to edit.
 * *set_address* - boolean; If true, set the address for this entry to the value of "address".
 * *address* - string; (Optional) The 95-character public address to set.
 * *set_description* - boolean; If true, set the description for this entry to the value of "description".
@@ -2651,8 +2652,8 @@ Set whether and how often to automatically refresh the current wallet.
 
 Inputs:
 
-* *enable* - boolean; (Optional) Enable or disable automatic refreshing (default = true).
-* *period* - unsigned integer; (Optional) The period of the wallet refresh cycle (i.e. time between refreshes) in seconds.
+* *enable* - boolean; (Optional) Enable or disable automatic refreshing (Defaults to true).
+* *period* - unsigned int; (Optional) The period of the wallet refresh cycle (i.e. time between refreshes) in seconds.
 
 Outputs: *none*.
 
@@ -2801,10 +2802,10 @@ $ curl http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"c
 Restores a wallet from a given wallet address, view key, and optional spend key.
 
 Inputs:
-* *restore_height* - integer; (Optional; defaults to 0) The block height to restore the wallet from.
+* *restore_height* - int; (Optional, defaults to 0) The block height to restore the wallet from.
 * *filename* - string; The wallet's file name on the RPC server. 
 * *address* - string; The wallet's primary address.
-* *spendkey* - string; (Optional; omit to create a view-only wallet) The wallet's private spend key. 
+* *spendkey* - string; (Optional, omit to create a view-only wallet) The wallet's private spend key. 
 * *viewkey* - string; The wallet's private view key.
 * *password* - string; The wallet's password.
 * *autosave_current* - boolean; (Defaults to true) If true, save the current wallet before generating the new wallet. 
@@ -2820,7 +2821,7 @@ $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","me
 {
   "id": "0",
   "jsonrpc": "2.0",
-  result": {"address":"42gt8cXJSHAL4up8XoZh7fikVuswDU7itAoaCjSQyo6fFoeTQpAcAwrQ1cs8KvFynLFSBdabhmk7HEe3HS7UsAz4LYnVPYM",
+  "result": {"address":"42gt8cXJSHAL4up8XoZh7fikVuswDU7itAoaCjSQyo6fFoeTQpAcAwrQ1cs8KvFynLFSBdabhmk7HEe3HS7UsAz4LYnVPYM",
     "info":"Wallet has been generated successfully."   
   }
 }
@@ -2864,7 +2865,7 @@ Inputs:
 * *filename* - string; Name of the wallet.
 * *password* - string; Password of the wallet.
 * *seed* - string; Mnemonic phrase of the wallet to restore.
-* *restore_height* - integer; (Optional) Block height to restore the wallet from (default = 0).
+* *restore_height* - int; (Optional) Block height to restore the wallet from (Defaults to 0).
 * *language* - string; (Optional) Language of the mnemonic phrase in case the old language is invalid.
 * *seed_offset* - string; (Optional) Offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase.
 * *autosave_current* - boolean; Whether to save the currently open RPC wallet before closing it (Defaults to true).
@@ -3025,7 +3026,7 @@ Inputs:
 
 * *multisig_info* - array of string; List of multisig string from peers.
 * *threshold* - unsigned int; Amount of signatures needed to sign a transfer. Must be less or equal than the amount of signature in `multisig_info`.
-* *password* - string; Wallet password 
+* *password* - string; (Optional) Wallet password 
 
 Outputs:
 
@@ -3124,7 +3125,7 @@ Alias: *None*.
 Inputs:
 
 * *multisig_info* - array of string; List of multisig string from peers.
-* *password* - string; Wallet password 
+* *password* - string; (Optional) Wallet password 
 
 Outputs:
 
@@ -3267,7 +3268,7 @@ Inputs:
 
 Outputs:
 
-* *frozen* - bool;
+* *frozen* - boolean;
 
 Example:
 
@@ -3320,7 +3321,7 @@ Inputs:
 
 * *password* - string;
 * *multisig_info* - string;
-* *force_update_use_with_caution* - bool; (Optional; Default false) only require the minimum number of signers to complete this round (including local signer) ( minimum = num_signers - (round num - 1).
+* *force_update_use_with_caution* - boolean; (Optional, Defaults to false) only require the minimum number of signers to complete this round (including local signer) ( minimum = num_signers - (round num - 1).
 
 Outputs:
 
@@ -3351,7 +3352,7 @@ Inputs:
 * *n_inputs* - unsigned int;
 * *n_outputs* - unsigned int;
 * *ring_size* - unsigned int; Sets ringsize to n (mixin + 1). (Unless dealing with pre rct outputs, this field is ignored on mainnet).
-* *rct* - bool; Is this a Ring Confidential Transaction (post blockheight 1220516)
+* *rct* - boolean; Is this a Ring Confidential Transaction (post blockheight 1220516)
 
 Outputs:
 
@@ -3381,7 +3382,7 @@ Alias: *None*.
 
 Inputs:
 
-* *txids* - string list;
+* *txids* - array of string;
 
 Outputs: *None*.
 
